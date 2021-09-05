@@ -406,6 +406,3 @@ class SqliteDatabase(BaseDatabase):
             overview.end = end_bar.datetime
 
             overview.save()
-
-
-database = SqliteDatabase()

@@ -1,2 +1,1 @@
-# flake8: noqa
-from .sqlite_database import database
+from .sqlite_database import SqliteDatabase as Database
