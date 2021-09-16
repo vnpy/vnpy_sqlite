@@ -186,6 +186,8 @@ class SqliteDatabase(BaseDatabase):
 
         overview.save()
 
+        return True
+
     def save_tick_data(self, ticks: List[TickData]) -> bool:
         """保存TICK数据"""
         # 将TickData数据转换为字典，并调整时区
@@ -204,6 +206,8 @@ class SqliteDatabase(BaseDatabase):
         with self.db.atomic():
             for c in chunked(data, 10):
                 DbTickData.insert_many(c).on_conflict_replace().execute()
+
+        return True
 
     def load_bar_data(
         self,
@@ -229,7 +233,7 @@ class SqliteDatabase(BaseDatabase):
             bar = BarData(
                 symbol=db_bar.symbol,
                 exchange=Exchange(db_bar.exchange),
-                datetime=db_bar.datetime.astimezone(DB_TZ),
+                datetime=datetime.fromtimestamp(db_bar.datetime.timestamp(), DB_TZ),
                 interval=Interval(db_bar.interval),
                 volume=db_bar.volume,
                 turnover=db_bar.turnover,
@@ -266,7 +270,7 @@ class SqliteDatabase(BaseDatabase):
             tick = TickData(
                 symbol=db_tick.symbol,
                 exchange=Exchange(db_tick.exchange),
-                datetime=db_tick.datetime.astimezone(DB_TZ),
+                datetime=datetime.fromtimestamp(db_tick.datetime.timestamp(), DB_TZ),
                 name=db_tick.name,
                 volume=db_tick.volume,
                 turnover=db_tick.turnover,
