@@ -5,7 +5,9 @@ from peewee import (
     AutoField,
     CharField,
     DateTimeField,
-    FloatField, IntegerField,
+    FloatField, 
+    IntegerField,
+    BooleanField,
     Model,
     SqliteDatabase as PeeweeSqliteDatabase,
     ModelSelect,
@@ -15,7 +17,7 @@ from peewee import (
 )
 
 from vnpy.trader.constant import Exchange, Interval
-from vnpy.trader.object import BarData, TickData
+from vnpy.trader.object import BarData, TickData, ContractData
 from vnpy.trader.utility import get_file_path
 from vnpy.trader.database import (
     BaseDatabase,
@@ -105,6 +107,37 @@ class DbTickData(Model):
         database = db
         indexes = ((("symbol", "exchange", "datetime"), True),)
 
+class DbContractData(Model):
+    """CONTRACT数据表映射对象"""
+
+    id = AutoField()
+
+    symbol: str = CharField()
+    exchange: str = CharField()
+    datetime: datetime = DateTimeField()
+
+    name: str = CharField()
+    product: str = CharField()
+    size: float = FloatField()
+    pricetick: float = FloatField()
+
+    min_volume: float = FloatField()          # minimum trading volume of the contract
+    stop_supported: bool = BooleanField()    # whether server supports stop order
+    net_position: bool = BooleanField()      # whether gateway uses net position volume
+    history_data: bool = BooleanField()      # whether gateway provides bar history data
+
+    option_strike: float = FloatField()
+    option_underlying: str = CharField()   # vt_symbol of underlying contract
+    option_type: str = CharField()
+    option_expiry: datetime = DateTimeField()
+    option_portfolio: str = CharField()
+    option_index: str = CharField()          # for identifying options with same strike price
+
+    localtime: datetime = DateTimeField(null=True)
+
+    class Meta:
+        database = db
+        indexes = ((("symbol", "exchange", "datetime"), True),)
 
 class DbBarOverview(Model):
     """K线汇总数据表映射对象"""
@@ -209,6 +242,27 @@ class SqliteDatabase(BaseDatabase):
 
         return True
 
+    def save_contract_data(self, contracts: List[ContractData]) -> bool:
+        """保存CONTRACT数据"""
+        # 将ContractData数据转换为字典，并调整时区
+        data = []
+
+        for contract in contracts:
+            contract.datetime = convert_tz(contract.datetime)
+
+            d = contract.__dict__
+            d["exchange"] = d["exchange"].value
+            d.pop("gateway_name")
+            d.pop("vt_symbol")
+            data.append(d)
+
+        # 使用upsert操作将数据更新到数据库中
+        with self.db.atomic():
+            for c in chunked(data, 10):
+                DbContractData.insert_many(c).on_conflict_replace().execute()
+
+        return True
+
     def load_bar_data(
         self,
         symbol: str,
@@ -309,6 +363,45 @@ class SqliteDatabase(BaseDatabase):
             ticks.append(tick)
 
         return ticks
+
+    def load_contract_data(
+        self,
+        symbol: str,
+        exchange: Exchange,
+        interval: Interval,
+        start: datetime,
+        end: datetime
+    ) -> List[ContractData]:
+        """读取合约数据"""
+        s: ModelSelect = (
+            DbContractData.select().where(
+                (DbBarData.symbol == symbol)
+                & (DbBarData.exchange == exchange.value)
+                & (DbBarData.interval == interval.value)
+                & (DbBarData.datetime >= start)
+                & (DbBarData.datetime <= end)
+            ).order_by(DbBarData.datetime)
+        )
+
+        bars: List[BarData] = []
+        for db_bar in s:
+            bar = BarData(
+                symbol=db_bar.symbol,
+                exchange=Exchange(db_bar.exchange),
+                datetime=datetime.fromtimestamp(db_bar.datetime.timestamp(), DB_TZ),
+                interval=Interval(db_bar.interval),
+                volume=db_bar.volume,
+                turnover=db_bar.turnover,
+                open_interest=db_bar.open_interest,
+                open_price=db_bar.open_price,
+                high_price=db_bar.high_price,
+                low_price=db_bar.low_price,
+                close_price=db_bar.close_price,
+                gateway_name="DB"
+            )
+            bars.append(bar)
+
+        return bars
 
     def delete_bar_data(
         self,
