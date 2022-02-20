@@ -1,4 +1,4 @@
-# vn.py框架的SQLite数据库接口
+# VeighNa框架的SQLite数据库接口
 
 <p align="center">
   <img src ="https://vnpy.oss-cn-shanghai.aliyuncs.com/vnpy-logo.png"/>
@@ -7,7 +7,7 @@
 <p align="center">
     <img src ="https://img.shields.io/badge/version-1.0.0-blueviolet.svg"/>
     <img src ="https://img.shields.io/badge/platform-windows|linux|macos-yellow.svg"/>
-    <img src ="https://img.shields.io/badge/python-3.7-blue.svg" />
+    <img src ="https://img.shields.io/badge/python-3.7|3.8|3.9|3.10-blue.svg" />
 </p>
 
 ## 说明
@@ -16,7 +16,7 @@
 
 ## 使用
 
-在vn.py中使用SQLite时，需要在全局配置中填写以下字段信息：
+在VeighNa中使用SQLite时，需要在全局配置中填写以下字段信息：
 
 |名称|含义|必填|举例|
 |---------|----|---|---|
