@@ -166,7 +166,7 @@ class SqliteDatabase(BaseDatabase):
         )
 
         if not overview:
-            overview: DbBarOverview = DbBarOverview()
+            overview = DbBarOverview()
             overview.symbol = symbol
             overview.exchange = exchange.value
             overview.interval = interval.value
@@ -356,7 +356,7 @@ class SqliteDatabase(BaseDatabase):
             self.init_bar_overview()
 
         s: ModelSelect = DbBarOverview.select()
-        overviews: list = []
+        overviews: List[BarOverview] = []
         for overview in s:
             overview.exchange = Exchange(overview.exchange)
             overview.interval = Interval(overview.interval)
