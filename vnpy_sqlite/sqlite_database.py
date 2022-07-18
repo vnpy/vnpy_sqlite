@@ -229,7 +229,7 @@ class SqliteDatabase(BaseDatabase):
             for c in chunked(data, 10):
                 DbTickData.insert_many(c).on_conflict_replace().execute()
 
-        # 更新K线汇总数据
+        # 更新Tick汇总数据
         overview: DbTickOverview = DbTickOverview.get_or_none(
             DbTickOverview.symbol == symbol,
             DbTickOverview.exchange == exchange.value,
