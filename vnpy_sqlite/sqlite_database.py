@@ -205,7 +205,7 @@ class SqliteDatabase(BaseDatabase):
 
         return True
 
-    def save_tick_data(self, ticks: List[TickData]) -> bool:
+    def save_tick_data(self, ticks: List[TickData], stream: bool = False) -> bool:
         """保存TICK数据"""
         # 读取主键参数
         tick: TickData = ticks[0]
@@ -242,6 +242,9 @@ class SqliteDatabase(BaseDatabase):
             overview.start = ticks[0].datetime
             overview.end = ticks[-1].datetime
             overview.count = len(ticks)
+        elif stream:
+            overview.end = ticks[-1].datetime
+            overview.count += len(ticks)
         else:
             overview.start = min(ticks[0].datetime, overview.start)
             overview.end = max(ticks[-1].datetime, overview.end)
