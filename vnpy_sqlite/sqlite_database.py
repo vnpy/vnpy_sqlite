@@ -149,7 +149,7 @@ class SqliteDatabase(BaseDatabase):
         self.db.connect()
         self.db.create_tables([DbBarData, DbTickData, DbBarOverview, DbTickOverview])
 
-    def save_bar_data(self, bars: List[BarData]) -> bool:
+    def save_bar_data(self, bars: List[BarData], stream: bool = False) -> bool:
         """保存K线数据"""
         # 读取主键参数
         bar: BarData = bars[0]
@@ -190,6 +190,9 @@ class SqliteDatabase(BaseDatabase):
             overview.start = bars[0].datetime
             overview.end = bars[-1].datetime
             overview.count = len(bars)
+        elif stream:
+            overview.end = bars[-1].datetime
+            overview.count += len(bars)
         else:
             overview.start = min(bars[0].datetime, overview.start)
             overview.end = max(bars[-1].datetime, overview.end)
