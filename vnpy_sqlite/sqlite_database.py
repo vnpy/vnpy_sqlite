@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from typing import List
 
@@ -17,6 +18,7 @@ from peewee import (
 from vnpy.trader.constant import Exchange, Interval
 from vnpy.trader.object import BarData, TickData
 from vnpy.trader.utility import get_file_path
+from vnpy.trader.setting import SETTINGS
 from vnpy.trader.database import (
     BaseDatabase,
     BarOverview,
@@ -26,7 +28,11 @@ from vnpy.trader.database import (
 )
 
 
-path: str = str(get_file_path("database.db"))
+database_path = SETTINGS["database.database"]
+if os.path.isabs(database_path):
+    path: str = str(database_path)
+else:
+    path: str = str(get_file_path(database_path))
 db: PeeweeSqliteDatabase = PeeweeSqliteDatabase(path)
 
 
