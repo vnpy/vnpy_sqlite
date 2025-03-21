@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 from peewee import (
     AutoField,
@@ -26,7 +25,7 @@ from vnpy.trader.database import (
 )
 
 
-path: str = str(get_file_path("database.db"))
+path: CharField = str(get_file_path("database.db"))
 db: PeeweeSqliteDatabase = PeeweeSqliteDatabase(path)
 
 
@@ -35,18 +34,18 @@ class DbBarData(Model):
 
     id: AutoField = AutoField()
 
-    symbol: str = CharField()
-    exchange: str = CharField()
-    datetime: datetime = DateTimeField()
-    interval: str = CharField()
+    symbol: CharField = CharField()
+    exchange: CharField = CharField()
+    datetime: DateTimeField = DateTimeField()
+    interval: CharField = CharField()
 
-    volume: float = FloatField()
-    turnover: float = FloatField()
-    open_interest: float = FloatField()
-    open_price: float = FloatField()
-    high_price: float = FloatField()
-    low_price: float = FloatField()
-    close_price: float = FloatField()
+    volume: FloatField = FloatField()
+    turnover: FloatField = FloatField()
+    open_interest: FloatField = FloatField()
+    open_price: FloatField = FloatField()
+    high_price: FloatField = FloatField()
+    low_price: FloatField = FloatField()
+    close_price: FloatField = FloatField()
 
     class Meta:
         database: PeeweeSqliteDatabase = db
@@ -58,49 +57,49 @@ class DbTickData(Model):
 
     id: AutoField = AutoField()
 
-    symbol: str = CharField()
-    exchange: str = CharField()
-    datetime: datetime = DateTimeField()
+    symbol: CharField = CharField()
+    exchange: CharField = CharField()
+    datetime: DateTimeField = DateTimeField()
 
-    name: str = CharField()
-    volume: float = FloatField()
-    turnover: float = FloatField()
-    open_interest: float = FloatField()
-    last_price: float = FloatField()
-    last_volume: float = FloatField()
-    limit_up: float = FloatField()
-    limit_down: float = FloatField()
+    name: CharField = CharField()
+    volume: FloatField = FloatField()
+    turnover: FloatField = FloatField()
+    open_interest: FloatField = FloatField()
+    last_price: FloatField = FloatField()
+    last_volume: FloatField = FloatField()
+    limit_up: FloatField = FloatField()
+    limit_down: FloatField = FloatField()
 
-    open_price: float = FloatField()
-    high_price: float = FloatField()
-    low_price: float = FloatField()
-    pre_close: float = FloatField()
+    open_price: FloatField = FloatField()
+    high_price: FloatField = FloatField()
+    low_price: FloatField = FloatField()
+    pre_close: FloatField = FloatField()
 
-    bid_price_1: float = FloatField()
-    bid_price_2: float = FloatField(null=True)
-    bid_price_3: float = FloatField(null=True)
-    bid_price_4: float = FloatField(null=True)
-    bid_price_5: float = FloatField(null=True)
+    bid_price_1: FloatField = FloatField()
+    bid_price_2: FloatField = FloatField(null=True)
+    bid_price_3: FloatField = FloatField(null=True)
+    bid_price_4: FloatField = FloatField(null=True)
+    bid_price_5: FloatField = FloatField(null=True)
 
-    ask_price_1: float = FloatField()
-    ask_price_2: float = FloatField(null=True)
-    ask_price_3: float = FloatField(null=True)
-    ask_price_4: float = FloatField(null=True)
-    ask_price_5: float = FloatField(null=True)
+    ask_price_1: FloatField = FloatField()
+    ask_price_2: FloatField = FloatField(null=True)
+    ask_price_3: FloatField = FloatField(null=True)
+    ask_price_4: FloatField = FloatField(null=True)
+    ask_price_5: FloatField = FloatField(null=True)
 
-    bid_volume_1: float = FloatField()
-    bid_volume_2: float = FloatField(null=True)
-    bid_volume_3: float = FloatField(null=True)
-    bid_volume_4: float = FloatField(null=True)
-    bid_volume_5: float = FloatField(null=True)
+    bid_volume_1: FloatField = FloatField()
+    bid_volume_2: FloatField = FloatField(null=True)
+    bid_volume_3: FloatField = FloatField(null=True)
+    bid_volume_4: FloatField = FloatField(null=True)
+    bid_volume_5: FloatField = FloatField(null=True)
 
-    ask_volume_1: float = FloatField()
-    ask_volume_2: float = FloatField(null=True)
-    ask_volume_3: float = FloatField(null=True)
-    ask_volume_4: float = FloatField(null=True)
-    ask_volume_5: float = FloatField(null=True)
+    ask_volume_1: FloatField = FloatField()
+    ask_volume_2: FloatField = FloatField(null=True)
+    ask_volume_3: FloatField = FloatField(null=True)
+    ask_volume_4: FloatField = FloatField(null=True)
+    ask_volume_5: FloatField = FloatField(null=True)
 
-    localtime: datetime = DateTimeField(null=True)
+    localtime: DateTimeField = DateTimeField(null=True)
 
     class Meta:
         database: PeeweeSqliteDatabase = db
@@ -112,12 +111,12 @@ class DbBarOverview(Model):
 
     id: AutoField = AutoField()
 
-    symbol: str = CharField()
-    exchange: str = CharField()
-    interval: str = CharField()
+    symbol: CharField = CharField()
+    exchange: CharField = CharField()
+    interval: CharField = CharField()
     count: int = IntegerField()
-    start: datetime = DateTimeField()
-    end: datetime = DateTimeField()
+    start: DateTimeField = DateTimeField()
+    end: DateTimeField = DateTimeField()
 
     class Meta:
         database: PeeweeSqliteDatabase = db
@@ -129,11 +128,11 @@ class DbTickOverview(Model):
 
     id: AutoField = AutoField()
 
-    symbol: str = CharField()
-    exchange: str = CharField()
+    symbol: CharField = CharField()
+    exchange: CharField = CharField()
     count: int = IntegerField()
-    start: datetime = DateTimeField()
-    end: datetime = DateTimeField()
+    start: DateTimeField = DateTimeField()
+    end: DateTimeField = DateTimeField()
 
     class Meta:
         database: PeeweeSqliteDatabase = db
@@ -149,11 +148,11 @@ class SqliteDatabase(BaseDatabase):
         self.db.connect()
         self.db.create_tables([DbBarData, DbTickData, DbBarOverview, DbTickOverview])
 
-    def save_bar_data(self, bars: List[BarData], stream: bool = False) -> bool:
+    def save_bar_data(self, bars: list[BarData], stream: bool = False) -> bool:
         """保存K线数据"""
         # 读取主键参数
         bar: BarData = bars[0]
-        symbol: str = bar.symbol
+        symbol: CharField = bar.symbol
         exchange: Exchange = bar.exchange
         interval: Interval = bar.interval
 
@@ -208,11 +207,11 @@ class SqliteDatabase(BaseDatabase):
 
         return True
 
-    def save_tick_data(self, ticks: List[TickData], stream: bool = False) -> bool:
+    def save_tick_data(self, ticks: list[TickData], stream: bool = False) -> bool:
         """保存TICK数据"""
         # 读取主键参数
         tick: TickData = ticks[0]
-        symbol: str = tick.symbol
+        symbol: CharField = tick.symbol
         exchange: Exchange = tick.exchange
 
         # 将TickData数据转换为字典，并调整时区
@@ -239,7 +238,7 @@ class SqliteDatabase(BaseDatabase):
         )
 
         if not overview:
-            overview: DbTickOverview = DbTickOverview()
+            overview = DbTickOverview()
             overview.symbol = symbol
             overview.exchange = exchange.value
             overview.start = ticks[0].datetime
@@ -269,7 +268,7 @@ class SqliteDatabase(BaseDatabase):
         interval: Interval,
         start: datetime,
         end: datetime
-    ) -> List[BarData]:
+    ) -> list[BarData]:
         """读取K线数据"""
         s: ModelSelect = (
             DbBarData.select().where(
@@ -281,7 +280,7 @@ class SqliteDatabase(BaseDatabase):
             ).order_by(DbBarData.datetime)
         )
 
-        bars: List[BarData] = []
+        bars: list[BarData] = []
         for db_bar in s:
             bar: BarData = BarData(
                 symbol=db_bar.symbol,
@@ -307,7 +306,7 @@ class SqliteDatabase(BaseDatabase):
         exchange: Exchange,
         start: datetime,
         end: datetime
-    ) -> List[TickData]:
+    ) -> list[TickData]:
         """读取TICK数据"""
         s: ModelSelect = (
             DbTickData.select().where(
@@ -318,7 +317,7 @@ class SqliteDatabase(BaseDatabase):
             ).order_by(DbTickData.datetime)
         )
 
-        ticks: List[TickData] = []
+        ticks: list[TickData] = []
         for db_tick in s:
             tick: TickData = TickData(
                 symbol=db_tick.symbol,
@@ -408,7 +407,7 @@ class SqliteDatabase(BaseDatabase):
 
         return count
 
-    def get_bar_overview(self) -> List[BarOverview]:
+    def get_bar_overview(self) -> list[BarOverview]:
         """查询数据库中的K线汇总信息"""
         # 如果已有K线，但缺失汇总信息，则执行初始化
         data_count: int = DbBarData.select().count()
@@ -417,14 +416,14 @@ class SqliteDatabase(BaseDatabase):
             self.init_bar_overview()
 
         s: ModelSelect = DbBarOverview.select()
-        overviews: List[BarOverview] = []
+        overviews: list[BarOverview] = []
         for overview in s:
             overview.exchange = Exchange(overview.exchange)
             overview.interval = Interval(overview.interval)
             overviews.append(overview)
         return overviews
 
-    def get_tick_overview(self) -> List[TickOverview]:
+    def get_tick_overview(self) -> list[TickOverview]:
         """查询数据库中的Tick汇总信息"""
         s: ModelSelect = DbTickOverview.select()
         overviews: list = []
