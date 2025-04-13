@@ -165,8 +165,7 @@ class SqliteDatabase(BaseDatabase):
             d: dict = bar.__dict__
             d["exchange"] = d["exchange"].value
             d["interval"] = d["interval"].value
-            d.pop("gateway_name")
-            d.pop("vt_symbol")
+            [d.pop(k) for k in [*d.keys()] if k not in dir(DbBarData)]
             data.append(d)
 
         # 使用upsert操作将数据更新到数据库中
@@ -222,8 +221,7 @@ class SqliteDatabase(BaseDatabase):
 
             d: dict = tick.__dict__
             d["exchange"] = d["exchange"].value
-            d.pop("gateway_name")
-            d.pop("vt_symbol")
+            [d.pop(k) for k in [*d.keys()] if k not in dir(DbTickData)]
             data.append(d)
 
         # 使用upsert操作将数据更新到数据库中
