@@ -167,6 +167,7 @@ class SqliteDatabase(BaseDatabase):
             d["interval"] = d["interval"].value
             d.pop("gateway_name")
             d.pop("vt_symbol")
+            d.pop("extra")
             data.append(d)
 
         # 使用upsert操作将数据更新到数据库中
@@ -224,6 +225,7 @@ class SqliteDatabase(BaseDatabase):
             d["exchange"] = d["exchange"].value
             d.pop("gateway_name")
             d.pop("vt_symbol")
+            d.pop("extra")
             data.append(d)
 
         # 使用upsert操作将数据更新到数据库中
