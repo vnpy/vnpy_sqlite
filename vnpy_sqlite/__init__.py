@@ -27,4 +27,4 @@ from .sqlite_database import SqliteDatabase as Database
 __all__ = ["Database"]
 
 
-__version__ = "1.1.1"
+__version__ = "1.1.2"
