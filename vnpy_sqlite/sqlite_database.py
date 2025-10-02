@@ -23,9 +23,10 @@ from vnpy.trader.database import (
     TickOverview,
     convert_tz
 )
+from vnpy.trader.setting import SETTINGS
 
-
-path: CharField = str(get_file_path("database.db"))
+filename: str = SETTINGS["database.database"] or "database.db"
+path: CharField = str(get_file_path(filename))
 db: PeeweeSqliteDatabase = PeeweeSqliteDatabase(path)
 
 
