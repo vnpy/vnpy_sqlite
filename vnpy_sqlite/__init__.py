@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+"""SQLite数据库接口。"""
 
 from .sqlite_database import SqliteDatabase as Database
 

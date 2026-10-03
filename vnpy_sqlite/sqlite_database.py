@@ -1,3 +1,5 @@
+"""SQLite的K线与Tick存储实现。"""
+
 from datetime import datetime
 
 from peewee import (
@@ -49,6 +51,7 @@ class DbBarData(Model):
     close_price: FloatField = FloatField()
 
     class Meta:
+        """绑定数据库，并以合约、交易所、周期和时间建立唯一索引。"""
         database: PeeweeSqliteDatabase = db
         indexes: tuple = ((("symbol", "exchange", "interval", "datetime"), True),)
 
@@ -103,6 +106,7 @@ class DbTickData(Model):
     localtime: DateTimeField = DateTimeField(null=True)
 
     class Meta:
+        """绑定数据库，并以合约、交易所和时间建立唯一索引。"""
         database: PeeweeSqliteDatabase = db
         indexes: tuple = ((("symbol", "exchange", "datetime"), True),)
 
@@ -120,6 +124,7 @@ class DbBarOverview(Model):
     end: DateTimeField = DateTimeField()
 
     class Meta:
+        """绑定数据库，并以合约、交易所和周期建立唯一索引。"""
         database: PeeweeSqliteDatabase = db
         indexes: tuple = ((("symbol", "exchange", "interval"), True),)
 
@@ -136,6 +141,7 @@ class DbTickOverview(Model):
     end: DateTimeField = DateTimeField()
 
     class Meta:
+        """绑定数据库，并以合约和交易所建立唯一索引。"""
         database: PeeweeSqliteDatabase = db
         indexes: tuple = ((("symbol", "exchange"), True),)
 
@@ -144,7 +150,7 @@ class SqliteDatabase(BaseDatabase):
     """SQLite数据库接口"""
 
     def __init__(self) -> None:
-        """"""
+        """连接数据库并创建K线、Tick及其汇总表。"""
         self.db: PeeweeSqliteDatabase = db
         self.db.connect()
         self.db.create_tables([DbBarData, DbTickData, DbBarOverview, DbTickOverview])
