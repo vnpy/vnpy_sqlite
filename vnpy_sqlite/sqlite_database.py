@@ -1,7 +1,7 @@
 """SQLite的K线与Tick存储实现。"""
 
 from datetime import datetime
-from typing import cast
+from typing import Protocol, cast
 
 from peewee import (
     AutoField,
@@ -149,6 +149,72 @@ class DbTickOverview(Model):
         indexes: tuple = ((("symbol", "exchange"), True),)
 
 
+class _BarRow(Protocol):
+    """K线查询行在运行时读到的 Python 值。"""
+
+    symbol: str
+    exchange: str
+    datetime: datetime
+    interval: str
+    volume: float
+    turnover: float
+    open_interest: float
+    open_price: float
+    high_price: float
+    low_price: float
+    close_price: float
+
+
+class _TickRow(Protocol):
+    """Tick查询行在运行时读到的 Python 值。"""
+
+    localtime: datetime | None
+    symbol: str
+    exchange: str
+    datetime: datetime
+    name: str
+    volume: float
+    turnover: float
+    open_interest: float
+    last_price: float
+    last_volume: float
+    limit_up: float
+    limit_down: float
+    open_price: float
+    high_price: float
+    low_price: float
+    pre_close: float
+    bid_price_1: float
+    bid_price_2: float
+    bid_price_3: float
+    bid_price_4: float
+    bid_price_5: float
+    ask_price_1: float
+    ask_price_2: float
+    ask_price_3: float
+    ask_price_4: float
+    ask_price_5: float
+    bid_volume_1: float
+    bid_volume_2: float
+    bid_volume_3: float
+    bid_volume_4: float
+    bid_volume_5: float
+    ask_volume_1: float
+    ask_volume_2: float
+    ask_volume_3: float
+    ask_volume_4: float
+    ask_volume_5: float
+
+
+class _BarGroupRow(Protocol):
+    """分组汇总行只包含合约、交易所、周期和根数。"""
+
+    symbol: str
+    exchange: str
+    interval: str
+    count: int
+
+
 class SqliteDatabase(BaseDatabase):
     """SQLite数据库接口"""
 
@@ -182,6 +248,7 @@ class SqliteDatabase(BaseDatabase):
 
         # 使用upsert操作将数据更新到数据库中
         with self.db.atomic():
+            c: list[dict]
             for c in chunked(data, 50):
                 DbBarData.insert_many(c).on_conflict_replace().execute()
 
@@ -240,6 +307,7 @@ class SqliteDatabase(BaseDatabase):
 
         # 使用upsert操作将数据更新到数据库中
         with self.db.atomic():
+            c: list[dict]
             for c in chunked(data, 10):
                 DbTickData.insert_many(c).on_conflict_replace().execute()
 
@@ -293,6 +361,7 @@ class SqliteDatabase(BaseDatabase):
         )
 
         bars: list[BarData] = []
+        db_bar: _BarRow
         for db_bar in s:
             bar: BarData = BarData(
                 symbol=db_bar.symbol,
@@ -330,6 +399,7 @@ class SqliteDatabase(BaseDatabase):
         )
 
         ticks: list[TickData] = []
+        db_tick: _TickRow
         for db_tick in s:
             tick: TickData = TickData(
                 symbol=db_tick.symbol,
@@ -429,6 +499,7 @@ class SqliteDatabase(BaseDatabase):
 
         s: ModelSelect = DbBarOverview.select()
         overviews: list[BarOverview] = []
+        overview: BarOverview
         for overview in s:
             overview.exchange = Exchange(overview.exchange)
             overview.interval = Interval(overview.interval)
@@ -439,6 +510,7 @@ class SqliteDatabase(BaseDatabase):
         """查询数据库中的Tick汇总信息"""
         s: ModelSelect = DbTickOverview.select()
         overviews: list = []
+        overview: TickOverview
         for overview in s:
             overview.exchange = Exchange(overview.exchange)
             overviews.append(overview)
@@ -459,6 +531,7 @@ class SqliteDatabase(BaseDatabase):
             )
         )
 
+        data: _BarGroupRow
         for data in s:
             overview: DbBarOverview = DbBarOverview()
             overview.symbol = data.symbol
