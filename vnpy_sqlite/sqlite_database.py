@@ -1,6 +1,7 @@
 """SQLite的K线与Tick存储实现。"""
 
 from datetime import datetime
+from typing import cast
 
 from peewee import (
     AutoField,
@@ -28,7 +29,7 @@ from vnpy.trader.database import (
 from vnpy.trader.setting import SETTINGS
 
 filename: str = SETTINGS["database.database"] or "database.db"
-path: CharField = str(get_file_path(filename))
+path: str = str(get_file_path(filename))
 db: PeeweeSqliteDatabase = PeeweeSqliteDatabase(path)
 
 
@@ -116,12 +117,13 @@ class DbBarOverview(Model):
 
     id: AutoField = AutoField()
 
-    symbol: CharField = CharField()
-    exchange: CharField = CharField()
-    interval: CharField = CharField()
-    count: int = IntegerField()
-    start: DateTimeField = DateTimeField()
-    end: DateTimeField = DateTimeField()
+    # 实例上读写到的是 Python 值；cast 不改变运行时的字段对象
+    symbol: str = cast(str, CharField())
+    exchange: str = cast(str, CharField())
+    interval: str = cast(str, CharField())
+    count: int = cast(int, IntegerField())
+    start: datetime = cast(datetime, DateTimeField())
+    end: datetime = cast(datetime, DateTimeField())
 
     class Meta:
         """绑定数据库，并以合约、交易所和周期建立唯一索引。"""
@@ -134,11 +136,12 @@ class DbTickOverview(Model):
 
     id: AutoField = AutoField()
 
-    symbol: CharField = CharField()
-    exchange: CharField = CharField()
-    count: int = IntegerField()
-    start: DateTimeField = DateTimeField()
-    end: DateTimeField = DateTimeField()
+    # 实例上读写到的是 Python 值；cast 不改变运行时的字段对象
+    symbol: str = cast(str, CharField())
+    exchange: str = cast(str, CharField())
+    count: int = cast(int, IntegerField())
+    start: datetime = cast(datetime, DateTimeField())
+    end: datetime = cast(datetime, DateTimeField())
 
     class Meta:
         """绑定数据库，并以合约和交易所建立唯一索引。"""
@@ -159,9 +162,9 @@ class SqliteDatabase(BaseDatabase):
         """保存K线数据"""
         # 读取主键参数
         bar: BarData = bars[0]
-        symbol: CharField = bar.symbol
+        symbol: str = bar.symbol
         exchange: Exchange = bar.exchange
-        interval: Interval = bar.interval
+        interval: Interval = cast(Interval, bar.interval)
 
         # 将BarData数据转换为字典，并调整时区
         data: list = []
@@ -219,7 +222,7 @@ class SqliteDatabase(BaseDatabase):
         """保存TICK数据"""
         # 读取主键参数
         tick: TickData = ticks[0]
-        symbol: CharField = tick.symbol
+        symbol: str = tick.symbol
         exchange: Exchange = tick.exchange
 
         # 将TickData数据转换为字典，并调整时区
@@ -473,7 +476,7 @@ class SqliteDatabase(BaseDatabase):
                 .order_by(DbBarData.datetime.asc())
                 .first()
             )
-            overview.start = start_bar.datetime
+            overview.start = cast(datetime, start_bar.datetime)
 
             end_bar: DbBarData = (
                 DbBarData.select()
@@ -485,6 +488,6 @@ class SqliteDatabase(BaseDatabase):
                 .order_by(DbBarData.datetime.desc())
                 .first()
             )
-            overview.end = end_bar.datetime
+            overview.end = cast(datetime, end_bar.datetime)
 
             overview.save()
