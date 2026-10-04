@@ -6,7 +6,11 @@ import pytest
 from vnpy.trader.constant import Exchange, Interval
 from vnpy.trader.database import DB_TZ, BarOverview, TickOverview, convert_tz
 from vnpy.trader.object import BarData, TickData
-from vnpy_sqlite.sqlite_database import SqliteDatabase, path as sqlite_path
+from vnpy_sqlite.sqlite_database import (
+    SqliteDatabase,
+    normalize_query_datetime,
+    path as sqlite_path,
+)
 
 
 _LOAD_START: datetime = datetime(2024, 1, 1)
@@ -216,6 +220,84 @@ def test_tick_overview_count_and_range(database: SqliteDatabase) -> None:
 
     database.delete_tick_data(symbol, Exchange.SHFE)
     assert _tick_overview(database, symbol) is None
+
+
+def test_normalize_query_datetime_leaves_naive_clock_unchanged() -> None:
+    naive: datetime = datetime(2024, 1, 2, 9, 30)
+    assert normalize_query_datetime(naive) == naive
+    assert normalize_query_datetime(naive).tzinfo is None
+
+
+def test_load_bar_data_aware_bound_keeps_first_bar(database: SqliteDatabase) -> None:
+    symbol: str = "sseSqliteTzBar"
+    bars: list[BarData] = [
+        BarData(
+            gateway_name="TEST",
+            symbol=symbol,
+            exchange=Exchange.SSE,
+            datetime=datetime(2024, 1, day, tzinfo=DB_TZ),
+            interval=Interval.DAILY,
+            volume=100.0,
+            open_price=10.0,
+            high_price=10.0,
+            low_price=10.0,
+            close_price=10.0,
+        )
+        for day in (2, 3, 4)
+    ]
+    database.save_bar_data(bars)
+
+    naive: list[BarData] = database.load_bar_data(
+        symbol,
+        Exchange.SSE,
+        Interval.DAILY,
+        datetime(2024, 1, 2),
+        datetime(2024, 1, 4),
+    )
+    aware: list[BarData] = database.load_bar_data(
+        symbol,
+        Exchange.SSE,
+        Interval.DAILY,
+        datetime(2024, 1, 2, tzinfo=DB_TZ),
+        datetime(2024, 1, 4, tzinfo=DB_TZ),
+    )
+    assert len(naive) == 3
+    assert [bar.datetime for bar in aware] == [bar.datetime for bar in naive]
+    database.delete_bar_data(symbol, Exchange.SSE, Interval.DAILY)
+
+
+def test_load_tick_data_aware_bound_keeps_boundary_tick(database: SqliteDatabase) -> None:
+    symbol: str = "sseSqliteTzTick"
+    moment: datetime = datetime(2024, 1, 2, 9, 30, tzinfo=DB_TZ)
+    database.save_tick_data([
+        TickData(
+            gateway_name="TEST",
+            symbol=symbol,
+            exchange=Exchange.SSE,
+            datetime=moment,
+            last_price=10.0,
+            volume=1.0,
+        )
+    ])
+
+    naive_start: datetime = datetime(2024, 1, 2, 9, 30)
+    naive_end: datetime = datetime(2024, 1, 2, 9, 31)
+    naive: list[TickData] = database.load_tick_data(
+        symbol,
+        Exchange.SSE,
+        naive_start,
+        naive_end,
+    )
+    aware: list[TickData] = database.load_tick_data(
+        symbol,
+        Exchange.SSE,
+        naive_start.replace(tzinfo=DB_TZ),
+        naive_end.replace(tzinfo=DB_TZ),
+    )
+    assert len(naive) == 1
+    assert len(aware) == 1
+    assert aware[0].datetime == naive[0].datetime
+    database.delete_tick_data(symbol, Exchange.SSE)
 
 
 def test_sqlite_file_created_under_temp_vntrader(

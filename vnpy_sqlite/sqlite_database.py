@@ -34,6 +34,13 @@ path: str = str(get_file_path(filename))
 db: PeeweeSqliteDatabase = PeeweeSqliteDatabase(path)
 
 
+def normalize_query_datetime(dt: datetime) -> datetime:
+    """带时区的查询边界转成与入库相同的朴素时间；朴素时间保持原样。"""
+    if dt.tzinfo is None:
+        return dt
+    return convert_tz(dt)
+
+
 class DbBarData(Model):
     """K线数据表映射对象"""
 
@@ -351,6 +358,8 @@ class SqliteDatabase(BaseDatabase):
         end: datetime
     ) -> list[BarData]:
         """读取K线数据"""
+        start = normalize_query_datetime(start)
+        end = normalize_query_datetime(end)
         s: ModelSelect[DbBarData] = (
             DbBarData.select().where(
                 (DbBarData.symbol == symbol)
@@ -389,6 +398,8 @@ class SqliteDatabase(BaseDatabase):
         end: datetime
     ) -> list[TickData]:
         """读取TICK数据"""
+        start = normalize_query_datetime(start)
+        end = normalize_query_datetime(end)
         s: ModelSelect[DbTickData] = (
             DbTickData.select().where(
                 (DbTickData.symbol == symbol)
